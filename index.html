@@ -1,0 +1,2281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pristivia — Wedding Planning Collaboratif</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Lucide -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- PapaParse -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<!-- SheetJS -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+:root{
+    --navy:#1E2A5E;
+    --terracotta:#E2725B;
+    --bg:#F7F8FC;
+}
+
+body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+}
+
+h1,h2,h3,h4{
+    font-family:'Playfair Display',serif;
+}
+
+.card{
+    background:white;
+    border-radius:24px;
+    box-shadow:0 10px 30px rgba(15,23,42,.05);
+}
+
+.fade-in{
+    animation:fade .3s ease;
+}
+
+@keyframes fade{
+    from{
+        opacity:0;
+        transform:translateY(6px);
+    }
+    to{
+        opacity:1;
+        transform:none;
+    }
+}
+
+.theme-terracotta{
+    --navy:#E2725B;
+    --terracotta:#1E2A5E;
+}
+
+.active-link{
+    background:rgba(255,255,255,.15);
+}
+
+input,select,textarea{
+    outline:none;
+}
+</style>
+</head>
+
+<body class="min-h-screen">
+
+<div class="flex min-h-screen">
+
+<!-- SIDEBAR -->
+<aside id="sidebar"
+class="fixed lg:sticky top-0 z-50 w-72 bg-[var(--navy)] text-white min-h-screen h-auto transition-all duration-300 -translate-x-full lg:translate-x-0 flex flex-col">
+
+    <div class="p-6 border-b border-white/10">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold">Pristivia</h1>
+                <p class="text-sm text-white/70 mt-1">
+                    Wedding planning collaboratif
+                </p>
+            </div>
+
+            <button class="lg:hidden" onclick="toggleSidebar()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="p-6 border-b border-white/10">
+        <div class="bg-white/10 rounded-2xl p-4">
+            <div class="text-xs uppercase tracking-wide text-white/60">
+                Rôle actuel
+            </div>
+
+            <div class="font-semibold mt-2">
+                Admin principal / Marié
+            </div>
+        </div>
+    </div>
+
+    <nav class="flex-1 p-4 overflow-y-auto space-y-2">
+
+        <button class="nav-link active-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10"
+        data-page="dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            Dashboard
+        </button>
+
+        <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10"
+        data-page="mariage">
+            <i data-lucide="heart"></i>
+            Mon mariage
+        </button>
+
+        <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10"
+        data-page="budget">
+            <i data-lucide="wallet"></i>
+            Budget
+        </button>
+
+        <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10"
+        data-page="guests">
+            <i data-lucide="users"></i>
+            Invités & RSVP
+        </button>
+
+        <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10"
+        data-page="tasks">
+            <i data-lucide="check-square"></i>
+            Rétroplanning
+        </button>
+
+        <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10"
+        data-page="tables">
+            <i data-lucide="table"></i>
+            Plan de table
+        </button>
+
+        <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10"
+        data-page="vendors">
+            <i data-lucide="briefcase"></i>
+            Prestataires
+        </button>
+
+        <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10"
+        data-page="documents">
+            <i data-lucide="folder"></i>
+            Documents
+        </button>
+
+        <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10"
+        data-page="notes">
+            <i data-lucide="notebook-tabs"></i>
+            Notes & Journal
+        </button>
+
+        <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10"
+        data-page="reports">
+            <i data-lucide="bar-chart-3"></i>
+            Rapports
+        </button>
+
+        <button class="nav-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10"
+        data-page="settings">
+            <i data-lucide="settings"></i>
+            Paramètres
+        </button>
+
+    </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="flex-1 min-w-0">
+
+<header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="flex items-center justify-between px-4 lg:px-8 py-4">
+
+        <div class="flex items-center gap-3">
+
+            <button class="lg:hidden" onclick="toggleSidebar()">
+                <i data-lucide="menu"></i>
+            </button>
+
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800">
+                    Pristivia
+                </h2>
+
+                <p class="text-slate-500 text-sm">
+                    Wedding planning simple & élégant
+                </p>
+            </div>
+
+        </div>
+
+        <div class="w-11 h-11 rounded-full bg-[var(--terracotta)] text-white flex items-center justify-center font-bold">
+            P
+        </div>
+
+    </div>
+</header>
+
+<div class="p-4 lg:p-8">
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="page fade-in space-y-6">
+
+    <div class="grid md:grid-cols-3 gap-6">
+
+        <div class="card p-6">
+            <div class="text-slate-500 text-sm">
+                Tâches terminées
+            </div>
+
+            <div id="kpiTasks"
+            class="text-4xl font-bold mt-3">
+                0
+            </div>
+        </div>
+
+        <div class="card p-6">
+            <div class="text-slate-500 text-sm">
+                Budget restant
+            </div>
+
+            <div id="kpiBudget"
+            class="text-4xl font-bold mt-3">
+                0
+            </div>
+        </div>
+
+        <div class="card p-6">
+            <div class="text-slate-500 text-sm">
+                Invités confirmés
+            </div>
+
+            <div id="kpiGuests"
+            class="text-4xl font-bold mt-3">
+                0
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card p-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h3 class="text-2xl font-bold">
+                    Progression globale
+                </h3>
+
+                <p class="text-slate-500 mt-1">
+                    Suivi de l'avancement
+                </p>
+            </div>
+
+            <div id="progressPercent"
+            class="text-3xl font-bold text-[var(--terracotta)]">
+                0%
+            </div>
+        </div>
+
+        <div class="w-full h-5 bg-slate-200 rounded-full mt-6 overflow-hidden">
+            <div id="progressBar"
+            class="bg-[var(--terracotta)] h-full"
+            style="width:0%"></div>
+        </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-6">
+
+        <div class="card p-6">
+            <h3 class="text-xl font-bold mb-5">
+                Dépenses par catégorie
+            </h3>
+
+            <canvas id="budgetChart"></canvas>
+        </div>
+
+        <div class="card p-6">
+            <h3 class="text-xl font-bold mb-5">
+                Tâches par statut
+            </h3>
+
+            <canvas id="tasksChart"></canvas>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- MON MARIAGE -->
+<section id="mariage" class="page hidden fade-in">
+
+    <div class="card p-8">
+
+        <h2 class="text-3xl font-bold">
+            Mon mariage
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-6 mt-8">
+
+            <div>
+                <label class="block mb-2 font-medium">
+                    Nom du couple
+                </label>
+
+                <input id="coupleName"
+                class="w-full border rounded-2xl px-4 py-3"/>
+            </div>
+
+            <div>
+                <label class="block mb-2 font-medium">
+                    Date
+                </label>
+
+                <input id="weddingDate"
+                type="date"
+                class="w-full border rounded-2xl px-4 py-3"/>
+            </div>
+
+            <div>
+                <label class="block mb-2 font-medium">
+                    Lieu
+                </label>
+
+                <input id="weddingPlace"
+                class="w-full border rounded-2xl px-4 py-3"/>
+            </div>
+
+            <div>
+                <label class="block mb-2 font-medium">
+                    Wedding planner
+                </label>
+
+                <input id="planner"
+                class="w-full border rounded-2xl px-4 py-3"/>
+            </div>
+
+        </div>
+
+        <button onclick="saveWeddingInfo()"
+        class="mt-6 bg-[var(--navy)] text-white px-6 py-3 rounded-2xl">
+            Sauvegarder
+        </button>
+
+    </div>
+
+</section>
+
+<!-- BUDGET -->
+<section id="budget" class="page hidden fade-in space-y-6">
+
+    <div class="card p-6 flex justify-between items-center">
+
+        <div>
+            <h2 class="text-3xl font-bold">
+                Budget
+            </h2>
+        </div>
+
+        <button onclick="openBudgetModal()"
+        class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+            Ajouter
+        </button>
+
+    </div>
+
+    <div class="card p-6 overflow-auto">
+
+        <table class="w-full min-w-[850px]">
+
+            <thead>
+                <tr class="border-b text-left">
+                    <th class="py-3">Catégorie</th>
+                    <th>Prévu</th>
+                    <th>Réel</th>
+                    <th>Acompte</th>
+                    <th>Reste</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="budgetTable"></tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- GUESTS -->
+<section id="guests" class="page hidden fade-in space-y-6">
+
+    <div class="card p-6 flex flex-col lg:flex-row justify-between gap-4">
+
+        <div>
+            <h2 class="text-3xl font-bold">
+                Invités & RSVP
+            </h2>
+        </div>
+
+        <div class="flex gap-3 flex-wrap">
+
+            <input type="file"
+            id="csvFile"
+            accept=".csv"
+            class="hidden"/>
+
+            <button onclick="document.getElementById('csvFile').click()"
+            class="bg-slate-200 px-5 py-3 rounded-2xl">
+                Import CSV
+            </button>
+
+            <button onclick="openGuestModal()"
+            class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+                Ajouter
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="card p-6 overflow-auto">
+
+        <table class="w-full min-w-[900px]">
+
+            <thead>
+                <tr class="border-b text-left">
+                    <th class="py-3">Nom</th>
+                    <th>Prénom</th>
+                    <th>RSVP</th>
+                    <th>Régime</th>
+                    <th>Accompagnants</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="guestTable"></tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- TASKS -->
+<section id="tasks" class="page hidden fade-in space-y-6">
+
+    <div class="card p-6 flex justify-between items-center">
+
+        <div>
+            <h2 class="text-3xl font-bold">
+                Rétroplanning
+            </h2>
+        </div>
+
+        <button onclick="openTaskModal()"
+        class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+            Ajouter tâche
+        </button>
+
+    </div>
+
+    <div class="card p-6 overflow-auto">
+
+        <table class="w-full min-w-[850px]">
+
+            <thead>
+                <tr class="border-b text-left">
+                    <th class="py-3">Date</th>
+                    <th>Tâche</th>
+                    <th>Responsable</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="taskTable"></tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- TABLES -->
+<section id="tables" class="page hidden fade-in space-y-6">
+
+    <div class="card p-6 flex justify-between items-center">
+
+        <div>
+            <h2 class="text-3xl font-bold">
+                Plan de table
+            </h2>
+        </div>
+
+        <button onclick="openTableModal()"
+        class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+            Nouvelle table
+        </button>
+
+    </div>
+
+    <div id="tablesContainer"
+    class="grid md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+
+</section>
+
+<!-- VENDORS -->
+<section id="vendors" class="page hidden fade-in space-y-6">
+
+    <div class="card p-6 flex justify-between items-center">
+
+        <div>
+            <h2 class="text-3xl font-bold">
+                Prestataires
+            </h2>
+        </div>
+
+        <button onclick="openVendorModal()"
+        class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+            Ajouter
+        </button>
+
+    </div>
+
+    <div id="vendorsGrid"
+    class="grid md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+
+</section>
+
+<!-- DOCUMENTS -->
+<section id="documents" class="page hidden fade-in space-y-6">
+
+    <div class="card p-6 flex flex-col lg:flex-row justify-between gap-4">
+
+        <div>
+            <h2 class="text-3xl font-bold">
+                Documents
+            </h2>
+        </div>
+
+        <div class="flex gap-3">
+
+            <input id="docSearch"
+            oninput="renderDocuments()"
+            placeholder="Recherche..."
+            class="border rounded-2xl px-4 py-3"/>
+
+            <button onclick="openDocumentModal()"
+            class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+                Upload
+            </button>
+
+        </div>
+
+    </div>
+
+    <div id="documentsGrid"
+    class="grid md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+
+</section>
+
+<!-- NOTES -->
+<section id="notes" class="page hidden fade-in space-y-6">
+
+    <div class="flex justify-between items-center">
+
+        <div>
+            <h2 class="text-3xl font-bold">
+                Notes collaboratives
+            </h2>
+        </div>
+
+        <button onclick="openNewNoteModal()"
+        class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+            Nouvelle note
+        </button>
+
+    </div>
+
+    <div class="grid xl:grid-cols-3 gap-6">
+
+        <div class="card p-5">
+
+            <h3 class="text-xl font-bold mb-5">
+                Mes notes
+            </h3>
+
+            <div id="notesList" class="space-y-3"></div>
+
+        </div>
+
+        <div class="card p-6 xl:col-span-2">
+
+            <div class="flex items-center justify-between">
+
+                <h3 id="activeNoteTitle"
+                class="text-2xl font-bold">
+                    Sélectionnez une note
+                </h3>
+
+                <button onclick="deleteCurrentNote()"
+                class="bg-red-100 text-red-600 px-4 py-2 rounded-xl">
+                    Supprimer
+                </button>
+
+            </div>
+
+            <textarea id="noteEditor"
+            class="w-full h-[500px] border rounded-2xl mt-6 p-5"
+            placeholder="Écrivez ici..."></textarea>
+
+        </div>
+
+    </div>
+
+    <div class="card p-6">
+
+        <h2 class="text-3xl font-bold">
+            Journal des actions
+        </h2>
+
+        <div id="activityLog"
+        class="space-y-4 mt-6"></div>
+
+    </div>
+
+</section>
+
+<!-- REPORTS -->
+<section id="reports" class="page hidden fade-in">
+
+    <div class="card p-6">
+
+        <h2 class="text-3xl font-bold">
+            Rapports & Exports
+        </h2>
+
+        <div class="grid md:grid-cols-2 xl:grid-cols-5 gap-4 mt-8">
+
+            <button onclick="exportBudgetCSV()"
+            class="bg-[var(--navy)] text-white rounded-2xl px-5 py-5">
+                Export Budget
+            </button>
+
+            <button onclick="exportGuestsCSV()"
+            class="bg-[var(--navy)] text-white rounded-2xl px-5 py-5">
+                Export Invités
+            </button>
+
+            <button onclick="exportTasksExcel()"
+            class="bg-[var(--navy)] text-white rounded-2xl px-5 py-5">
+                Export Tâches
+            </button>
+
+            <button onclick="exportTablesPDF()"
+            class="bg-[var(--navy)] text-white rounded-2xl px-5 py-5">
+                Export PDF
+            </button>
+
+            <button onclick="exportDocumentsZip()"
+            class="bg-[var(--navy)] text-white rounded-2xl px-5 py-5">
+                Export Documents
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- SETTINGS -->
+<section id="settings" class="page hidden fade-in">
+
+    <div class="card p-8 space-y-8">
+
+        <div>
+            <h2 class="text-3xl font-bold">
+                Paramètres
+            </h2>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+
+            <div>
+                <label class="block mb-2 font-medium">
+                    Thème
+                </label>
+
+                <select id="themeSelect"
+                class="w-full border rounded-2xl px-4 py-3">
+
+                    <option value="navy">
+                        Navy
+                    </option>
+
+                    <option value="terracotta">
+                        Terracotta
+                    </option>
+
+                </select>
+            </div>
+
+            <div>
+                <label class="block mb-2 font-medium">
+                    Budget global
+                </label>
+
+                <input id="globalBudget"
+                type="number"
+                class="w-full border rounded-2xl px-4 py-3"/>
+            </div>
+
+            <div>
+                <label class="block mb-2 font-medium">
+                    Invités max
+                </label>
+
+                <input id="maxGuests"
+                type="number"
+                class="w-full border rounded-2xl px-4 py-3"/>
+            </div>
+
+            <div>
+                <label class="block mb-2 font-medium">
+                    Devise
+                </label>
+
+                <input id="currency"
+                class="w-full border rounded-2xl px-4 py-3"/>
+            </div>
+
+        </div>
+
+        <button onclick="saveSettings()"
+        class="bg-[var(--terracotta)] text-white px-6 py-3 rounded-2xl">
+            Sauvegarder
+        </button>
+
+    </div>
+
+</section>
+
+</div>
+
+</main>
+</div>
+
+<!-- MODAL -->
+<div id="modalContainer"></div>
+
+<script>
+
+lucide.createIcons();
+
+const LS_KEY = "pristivia_v2";
+
+let state = {
+    budget: [],
+    guests: [],
+    tasks: [],
+    tables: [],
+    vendors: [],
+    documents: [],
+    logs: [],
+    notesCollection: [],
+    activeNoteId: null,
+    settings:{
+        theme:"navy",
+        budget:10000000,
+        maxGuests:300,
+        currency:"FCFA"
+    },
+    wedding:{
+        couple:"",
+        date:"",
+        place:"",
+        planner:""
+    }
+};
+
+function seedData(){
+
+    state.budget = [
+        {id:1,category:"Salle",planned:2500000,real:2000000,deposit:1000000},
+        {id:2,category:"Traiteur",planned:1800000,real:1500000,deposit:500000},
+        {id:3,category:"Décoration",planned:900000,real:700000,deposit:250000},
+        {id:4,category:"Photo/Vidéo",planned:1200000,real:850000,deposit:350000},
+    ];
+
+    state.guests = [
+        {id:1,last:"Ntepp",first:"Steve",rsvp:"Confirmé",diet:"Standard",plus:1},
+        {id:2,last:"Anna",first:"Marie",rsvp:"Confirmé",diet:"Végétarien",plus:0},
+        {id:3,last:"Sow",first:"Fatou",rsvp:"En attente",diet:"Halal",plus:1},
+        {id:4,last:"Ba",first:"Ibra",rsvp:"Confirmé",diet:"Standard",plus:2},
+        {id:5,last:"Ngono",first:"Paul",rsvp:"Refusé",diet:"Standard",plus:0},
+        {id:6,last:"Dia",first:"Awa",rsvp:"Confirmé",diet:"Végétarien",plus:0}
+    ];
+
+    state.tasks = [
+        {id:1,date:"2026-05-20",task:"Réserver salle",owner:"Steve",status:"fait"},
+        {id:2,date:"2026-05-22",task:"Choisir traiteur",owner:"Anna",status:"fait"},
+        {id:3,date:"2026-05-28",task:"Décoration",owner:"Planner",status:"à faire"},
+        {id:4,date:"2026-06-01",task:"Invitations",owner:"Steve",status:"fait"},
+        {id:5,date:"2026-06-05",task:"DJ",owner:"Anna",status:"à faire"},
+        {id:6,date:"2026-06-10",task:"Essayage",owner:"Anna",status:"à faire"},
+        {id:7,date:"2026-06-14",task:"Plan de table",owner:"Planner",status:"à faire"},
+        {id:8,date:"2026-06-18",task:"Répétition",owner:"Steve",status:"à faire"},
+    ];
+
+    state.tables = [
+        {id:1,name:"Table Famille",capacity:8,guests:[1,2]},
+        {id:2,name:"Table VIP",capacity:6,guests:[4]},
+        {id:3,name:"Table Amis",capacity:10,guests:[3,6]},
+    ];
+
+    state.vendors = [
+        {id:1,name:"Elite Events",contact:"+22177000000",budget:1200000,status:"Réservé"},
+        {id:2,name:"Royal Flowers",contact:"+22178000000",budget:600000,status:"Contacté"},
+        {id:3,name:"DJ Prestige",contact:"+22176000000",budget:500000,status:"Réservé"},
+        {id:4,name:"Visual Studio",contact:"+22170000000",budget:950000,status:"Réservé"},
+        {id:5,name:"Golden Catering",contact:"+22175000000",budget:1800000,status:"Contacté"},
+    ];
+
+    state.notesCollection = [
+        {
+            id:1,
+            title:"Checklist mariage",
+            content:"Finaliser le traiteur et les invitations."
+        }
+    ];
+
+    state.activeNoteId = 1;
+}
+
+function saveState(){
+    localStorage.setItem(
+        LS_KEY,
+        JSON.stringify(state)
+    );
+}
+
+function loadState(){
+
+    const data =
+        localStorage.getItem(LS_KEY);
+
+    if(data){
+
+        state = JSON.parse(data);
+
+    }else{
+
+        seedData();
+        saveState();
+    }
+}
+
+function toggleSidebar(){
+    document
+    .getElementById("sidebar")
+    .classList.toggle("-translate-x-full");
+}
+
+document.querySelectorAll(".nav-link")
+.forEach(btn=>{
+
+    btn.addEventListener("click",()=>{
+
+        document
+        .querySelectorAll(".nav-link")
+        .forEach(n=>n.classList.remove("active-link"));
+
+        btn.classList.add("active-link");
+
+        document
+        .querySelectorAll(".page")
+        .forEach(p=>p.classList.add("hidden"));
+
+        document
+        .getElementById(btn.dataset.page)
+        .classList.remove("hidden");
+
+        if(window.innerWidth < 1024){
+            toggleSidebar();
+        }
+    });
+});
+
+function currency(n){
+    return Number(n || 0).toLocaleString()
+    + " "
+    + state.settings.currency;
+}
+
+function logAction(action){
+
+    state.logs.unshift({
+        text:action,
+        date:new Date().toLocaleString()
+    });
+
+    state.logs = state.logs.slice(0,20);
+
+    saveState();
+    renderLogs();
+}
+
+function renderDashboard(){
+
+    const totalTasks = state.tasks.length;
+
+    const done =
+        state.tasks.filter(
+            t=>t.status==="fait"
+        ).length;
+
+    const configuredBudget =
+        Number(state.settings.budget || 0);
+
+    const spent =
+        state.budget.reduce(
+            (a,b)=>a+b.real,
+            0
+        );
+
+    const confirmed =
+        state.guests.filter(
+            g=>g.rsvp==="Confirmé"
+        ).length;
+
+    document.getElementById("kpiTasks")
+    .innerText = `${done}/${totalTasks}`;
+
+    document.getElementById("kpiBudget")
+    .innerText =
+        currency(configuredBudget - spent);
+
+    document.getElementById("kpiGuests")
+    .innerText =
+        `${confirmed}/${state.guests.length}`;
+
+    const percent =
+        Math.round((done/totalTasks)*100 || 0);
+
+    document.getElementById("progressPercent")
+    .innerText = percent + "%";
+
+    document.getElementById("progressBar")
+    .style.width = percent + "%";
+
+    renderCharts();
+}
+
+function renderCharts(){
+
+    const budgetLabels =
+        state.budget.map(b=>b.category);
+
+    const budgetValues =
+        state.budget.map(b=>b.real);
+
+    if(window.budgetChartInstance){
+        window.budgetChartInstance.destroy();
+    }
+
+    if(window.tasksChartInstance){
+        window.tasksChartInstance.destroy();
+    }
+
+    window.budgetChartInstance =
+        new Chart(
+            document.getElementById("budgetChart"),
+            {
+                type:"pie",
+                data:{
+                    labels:budgetLabels,
+                    datasets:[{
+                        data:budgetValues
+                    }]
+                }
+            }
+        );
+
+    const done =
+        state.tasks.filter(
+            t=>t.status==="fait"
+        ).length;
+
+    const todo =
+        state.tasks.length - done;
+
+    window.tasksChartInstance =
+        new Chart(
+            document.getElementById("tasksChart"),
+            {
+                type:"bar",
+                data:{
+                    labels:["Terminées","À faire"],
+                    datasets:[{
+                        label:"Tâches",
+                        data:[done,todo]
+                    }]
+                }
+            }
+        );
+}
+
+function renderBudget(){
+
+    const tbody =
+        document.getElementById("budgetTable");
+
+    tbody.innerHTML = "";
+
+    state.budget.forEach(item=>{
+
+        tbody.innerHTML += `
+        <tr class="border-b">
+            <td class="py-4">${item.category}</td>
+            <td>${currency(item.planned)}</td>
+            <td>${currency(item.real)}</td>
+            <td>${currency(item.deposit)}</td>
+            <td>${currency(item.real-item.deposit)}</td>
+
+            <td class="flex gap-2 py-3">
+
+                <button onclick="deleteBudget(${item.id})"
+                class="bg-red-100 text-red-600 px-3 py-2 rounded-xl">
+                    Supprimer
+                </button>
+
+            </td>
+        </tr>
+        `;
+    });
+}
+
+function renderGuests(){
+
+    const tbody =
+        document.getElementById("guestTable");
+
+    tbody.innerHTML = "";
+
+    state.guests.forEach(g=>{
+
+        tbody.innerHTML += `
+        <tr class="border-b">
+
+            <td class="py-4">${g.last}</td>
+            <td>${g.first}</td>
+            <td>${g.rsvp}</td>
+            <td>${g.diet}</td>
+            <td>${g.plus}</td>
+
+            <td class="py-3">
+
+                <button onclick="deleteGuest(${g.id})"
+                class="bg-red-100 text-red-600 px-3 py-2 rounded-xl">
+                    Supprimer
+                </button>
+
+            </td>
+
+        </tr>
+        `;
+    });
+}
+
+function renderTasks(){
+
+    const tbody =
+        document.getElementById("taskTable");
+
+    tbody.innerHTML = "";
+
+    state.tasks.forEach(t=>{
+
+        tbody.innerHTML += `
+        <tr class="border-b">
+
+            <td class="py-4">${t.date}</td>
+            <td>${t.task}</td>
+            <td>${t.owner}</td>
+
+            <td>
+                <span class="px-3 py-1 rounded-full ${t.status==="fait"
+                ? "bg-emerald-100 text-emerald-700"
+                : "bg-orange-100 text-orange-700"}">
+                    ${t.status}
+                </span>
+            </td>
+
+            <td class="flex gap-2 py-3">
+
+                <button onclick="toggleTask(${t.id})"
+                class="bg-slate-100 px-3 py-2 rounded-xl">
+                    Toggle
+                </button>
+
+                <button onclick="deleteTask(${t.id})"
+                class="bg-red-100 text-red-600 px-3 py-2 rounded-xl">
+                    Supprimer
+                </button>
+
+            </td>
+
+        </tr>
+        `;
+    });
+}
+
+function renderTables(){
+
+    const container =
+        document.getElementById("tablesContainer");
+
+    container.innerHTML = "";
+
+    state.tables.forEach(table=>{
+
+        const guestNames =
+            table.guests.map(id=>{
+
+                const g =
+                    state.guests.find(x=>x.id===id);
+
+                return g
+                    ? g.first + " " + g.last
+                    : "";
+            });
+
+        container.innerHTML += `
+        <div class="card p-6">
+
+            <div class="flex justify-between items-start">
+
+                <div>
+                    <h3 class="text-2xl font-bold">
+                        ${table.name}
+                    </h3>
+
+                    <p class="text-slate-500 mt-1">
+                        ${table.guests.length}/${table.capacity}
+                    </p>
+                </div>
+
+                <button onclick="deleteTable(${table.id})"
+                class="text-red-500">
+                    ✕
+                </button>
+
+            </div>
+
+            <div class="mt-5 flex flex-wrap gap-2">
+
+                ${guestNames.map(n=>
+                    `<span class="bg-slate-100 px-3 py-2 rounded-xl text-sm">${n}</span>`
+                ).join("")}
+
+            </div>
+
+            <select onchange="assignGuest(${table.id},this.value)"
+            class="mt-5 w-full border rounded-xl px-3 py-3">
+
+                <option value="">
+                    Ajouter un invité
+                </option>
+
+                ${state.guests.map(g=>
+                    `<option value="${g.id}">
+                        ${g.first} ${g.last}
+                    </option>`
+                ).join("")}
+
+            </select>
+
+        </div>
+        `;
+    });
+}
+
+function renderVendors(){
+
+    const grid =
+        document.getElementById("vendorsGrid");
+
+    grid.innerHTML = "";
+
+    state.vendors.forEach(v=>{
+
+        grid.innerHTML += `
+        <div class="card p-6">
+
+            <div class="flex justify-between">
+
+                <div>
+                    <h3 class="text-2xl font-bold">
+                        ${v.name}
+                    </h3>
+
+                    <p class="text-slate-500 mt-2">
+                        ${v.contact}
+                    </p>
+                </div>
+
+                <button onclick="deleteVendor(${v.id})"
+                class="text-red-500">
+                    ✕
+                </button>
+
+            </div>
+
+            <div class="mt-5 space-y-3">
+
+                <div class="flex justify-between">
+                    <span>Budget</span>
+                    <strong>${currency(v.budget)}</strong>
+                </div>
+
+                <div class="flex justify-between">
+                    <span>Statut</span>
+                    <span>${v.status}</span>
+                </div>
+
+            </div>
+
+        </div>
+        `;
+    });
+}
+
+function renderDocuments(){
+
+    const grid =
+        document.getElementById("documentsGrid");
+
+    const search =
+        document.getElementById("docSearch")
+        .value.toLowerCase();
+
+    grid.innerHTML = "";
+
+    state.documents
+    .filter(d=>
+        d.name.toLowerCase().includes(search)
+    )
+    .forEach(doc=>{
+
+        grid.innerHTML += `
+        <div class="card p-6">
+
+            <div class="flex justify-between">
+
+                <div>
+
+                    <div class="text-sm text-slate-500">
+                        ${doc.type}
+                    </div>
+
+                    <h3 class="text-xl font-bold mt-2">
+                        ${doc.name}
+                    </h3>
+
+                    <p class="text-sm text-slate-400 mt-2">
+                        ${doc.fileName || ""}
+                    </p>
+
+                </div>
+
+                <button onclick="deleteDocument(${doc.id})"
+                class="text-red-500">
+                    ✕
+                </button>
+
+            </div>
+
+            <div class="flex gap-3 mt-6">
+
+                <button onclick="openDocument(${doc.id})"
+                class="bg-slate-100 px-4 py-3 rounded-xl">
+                    Ouvrir
+                </button>
+
+                <button onclick="downloadDocument(${doc.id})"
+                class="bg-[var(--terracotta)] text-white px-4 py-3 rounded-xl">
+                    Télécharger
+                </button>
+
+            </div>
+
+        </div>
+        `;
+    });
+}
+
+function renderLogs(){
+
+    const box =
+        document.getElementById("activityLog");
+
+    box.innerHTML = "";
+
+    state.logs.forEach(l=>{
+
+        box.innerHTML += `
+        <div class="border rounded-2xl p-4">
+
+            <div class="font-medium">
+                ${l.text}
+            </div>
+
+            <div class="text-sm text-slate-500 mt-1">
+                ${l.date}
+            </div>
+
+        </div>
+        `;
+    });
+}
+
+function renderNotes(){
+
+    const list =
+        document.getElementById("notesList");
+
+    list.innerHTML = "";
+
+    state.notesCollection.forEach(note=>{
+
+        list.innerHTML += `
+        <button onclick="openNote(${note.id})"
+        class="w-full text-left border rounded-2xl p-4 hover:bg-slate-50">
+
+            <div class="font-semibold">
+                ${note.title}
+            </div>
+
+        </button>
+        `;
+    });
+
+    if(state.activeNoteId){
+
+        const active =
+            state.notesCollection.find(
+                n=>n.id===state.activeNoteId
+            );
+
+        if(active){
+
+            document.getElementById(
+                "activeNoteTitle"
+            ).innerText = active.title;
+
+            document.getElementById(
+                "noteEditor"
+            ).value = active.content;
+        }
+    }
+}
+
+function renderAll(){
+
+    renderDashboard();
+    renderBudget();
+    renderGuests();
+    renderTasks();
+    renderTables();
+    renderVendors();
+    renderDocuments();
+    renderLogs();
+    renderNotes();
+
+    document.getElementById("coupleName")
+    .value = state.wedding?.couple || "";
+
+    document.getElementById("weddingDate")
+    .value = state.wedding?.date || "";
+
+    document.getElementById("weddingPlace")
+    .value = state.wedding?.place || "";
+
+    document.getElementById("planner")
+    .value = state.wedding?.planner || "";
+
+    document.getElementById("themeSelect")
+    .value = state.settings.theme;
+
+    document.getElementById("globalBudget")
+    .value = state.settings.budget;
+
+    document.getElementById("maxGuests")
+    .value = state.settings.maxGuests;
+
+    document.getElementById("currency")
+    .value = state.settings.currency;
+
+    applyTheme();
+}
+
+function applyTheme(){
+
+    if(state.settings.theme==="terracotta"){
+
+        document.body.classList.add(
+            "theme-terracotta"
+        );
+
+    }else{
+
+        document.body.classList.remove(
+            "theme-terracotta"
+        );
+    }
+}
+
+function modal(html){
+
+    document.getElementById(
+        "modalContainer"
+    ).innerHTML = `
+    <div class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+
+        <div class="bg-white rounded-[30px] w-full max-w-xl p-8 max-h-[90vh] overflow-auto">
+            ${html}
+        </div>
+
+    </div>
+    `;
+}
+
+function closeModal(){
+    document.getElementById(
+        "modalContainer"
+    ).innerHTML = "";
+}
+
+function openBudgetModal(){
+
+    modal(`
+        <h2 class="text-3xl font-bold">
+            Ajouter budget
+        </h2>
+
+        <div class="space-y-4 mt-6">
+
+            <input id="bCategory"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Catégorie"/>
+
+            <input id="bPlanned"
+            type="number"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Prévu"/>
+
+            <input id="bReal"
+            type="number"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Réel"/>
+
+            <input id="bDeposit"
+            type="number"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Acompte"/>
+
+        </div>
+
+        <div class="flex gap-3 mt-8">
+
+            <button onclick="addBudget()"
+            class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+                Ajouter
+            </button>
+
+            <button onclick="closeModal()"
+            class="bg-slate-200 px-5 py-3 rounded-2xl">
+                Annuler
+            </button>
+
+        </div>
+    `);
+}
+
+function addBudget(){
+
+    state.budget.push({
+        id:Date.now(),
+        category:document.getElementById("bCategory").value,
+        planned:Number(document.getElementById("bPlanned").value),
+        real:Number(document.getElementById("bReal").value),
+        deposit:Number(document.getElementById("bDeposit").value),
+    });
+
+    saveState();
+    renderAll();
+    closeModal();
+
+    logAction("Nouvelle ligne budget");
+}
+
+function deleteBudget(id){
+
+    state.budget =
+        state.budget.filter(x=>x.id!==id);
+
+    saveState();
+    renderAll();
+}
+
+function openGuestModal(){
+
+    modal(`
+        <h2 class="text-3xl font-bold">
+            Ajouter invité
+        </h2>
+
+        <div class="space-y-4 mt-6">
+
+            <input id="gLast"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Nom"/>
+
+            <input id="gFirst"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Prénom"/>
+
+            <select id="gRsvp"
+            class="w-full border rounded-2xl px-4 py-3">
+
+                <option>Confirmé</option>
+                <option>En attente</option>
+                <option>Refusé</option>
+
+            </select>
+
+            <input id="gDiet"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Régime"/>
+
+        </div>
+
+        <div class="flex gap-3 mt-8">
+
+            <button onclick="addGuest()"
+            class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+                Ajouter
+            </button>
+
+            <button onclick="closeModal()"
+            class="bg-slate-200 px-5 py-3 rounded-2xl">
+                Annuler
+            </button>
+
+        </div>
+    `);
+}
+
+function addGuest(){
+
+    state.guests.push({
+        id:Date.now(),
+        last:document.getElementById("gLast").value,
+        first:document.getElementById("gFirst").value,
+        rsvp:document.getElementById("gRsvp").value,
+        diet:document.getElementById("gDiet").value,
+        plus:0
+    });
+
+    saveState();
+    renderAll();
+    closeModal();
+
+    logAction("Nouvel invité ajouté");
+}
+
+function deleteGuest(id){
+
+    state.guests =
+        state.guests.filter(x=>x.id!==id);
+
+    saveState();
+    renderAll();
+}
+
+function openTaskModal(){
+
+    modal(`
+        <h2 class="text-3xl font-bold">
+            Nouvelle tâche
+        </h2>
+
+        <div class="space-y-4 mt-6">
+
+            <input id="tDate"
+            type="date"
+            class="w-full border rounded-2xl px-4 py-3"/>
+
+            <input id="tTask"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Tâche"/>
+
+            <input id="tOwner"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Responsable"/>
+
+        </div>
+
+        <div class="flex gap-3 mt-8">
+
+            <button onclick="addTask()"
+            class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+                Ajouter
+            </button>
+
+            <button onclick="closeModal()"
+            class="bg-slate-200 px-5 py-3 rounded-2xl">
+                Annuler
+            </button>
+
+        </div>
+    `);
+}
+
+function addTask(){
+
+    state.tasks.push({
+        id:Date.now(),
+        date:document.getElementById("tDate").value,
+        task:document.getElementById("tTask").value,
+        owner:document.getElementById("tOwner").value,
+        status:"à faire"
+    });
+
+    saveState();
+    renderAll();
+    closeModal();
+
+    logAction("Nouvelle tâche créée");
+}
+
+function toggleTask(id){
+
+    const t =
+        state.tasks.find(x=>x.id===id);
+
+    t.status =
+        t.status==="fait"
+        ? "à faire"
+        : "fait";
+
+    saveState();
+    renderAll();
+}
+
+function deleteTask(id){
+
+    state.tasks =
+        state.tasks.filter(x=>x.id!==id);
+
+    saveState();
+    renderAll();
+}
+
+function openTableModal(){
+
+    modal(`
+        <h2 class="text-3xl font-bold">
+            Nouvelle table
+        </h2>
+
+        <div class="space-y-4 mt-6">
+
+            <input id="tableName"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Nom"/>
+
+            <input id="tableCapacity"
+            type="number"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Capacité"/>
+
+        </div>
+
+        <div class="flex gap-3 mt-8">
+
+            <button onclick="addTable()"
+            class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+                Ajouter
+            </button>
+
+            <button onclick="closeModal()"
+            class="bg-slate-200 px-5 py-3 rounded-2xl">
+                Annuler
+            </button>
+
+        </div>
+    `);
+}
+
+function addTable(){
+
+    state.tables.push({
+        id:Date.now(),
+        name:document.getElementById("tableName").value,
+        capacity:Number(document.getElementById("tableCapacity").value),
+        guests:[]
+    });
+
+    saveState();
+    renderAll();
+    closeModal();
+}
+
+function assignGuest(tableId,guestId){
+
+    if(!guestId) return;
+
+    const table =
+        state.tables.find(t=>t.id===tableId);
+
+    if(!table.guests.includes(Number(guestId))){
+        table.guests.push(Number(guestId));
+    }
+
+    saveState();
+    renderAll();
+}
+
+function deleteTable(id){
+
+    state.tables =
+        state.tables.filter(x=>x.id!==id);
+
+    saveState();
+    renderAll();
+}
+
+function openVendorModal(){
+
+    modal(`
+        <h2 class="text-3xl font-bold">
+            Ajouter prestataire
+        </h2>
+
+        <div class="space-y-4 mt-6">
+
+            <input id="vName"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Nom"/>
+
+            <input id="vContact"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Contact"/>
+
+            <input id="vBudget"
+            type="number"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Budget"/>
+
+            <select id="vStatus"
+            class="w-full border rounded-2xl px-4 py-3">
+
+                <option>Contacté</option>
+                <option>Réservé</option>
+
+            </select>
+
+        </div>
+
+        <div class="flex gap-3 mt-8">
+
+            <button onclick="addVendor()"
+            class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+                Ajouter
+            </button>
+
+            <button onclick="closeModal()"
+            class="bg-slate-200 px-5 py-3 rounded-2xl">
+                Annuler
+            </button>
+
+        </div>
+    `);
+}
+
+function addVendor(){
+
+    state.vendors.push({
+        id:Date.now(),
+        name:document.getElementById("vName").value,
+        contact:document.getElementById("vContact").value,
+        budget:Number(document.getElementById("vBudget").value),
+        status:document.getElementById("vStatus").value
+    });
+
+    saveState();
+    renderAll();
+    closeModal();
+}
+
+function deleteVendor(id){
+
+    state.vendors =
+        state.vendors.filter(x=>x.id!==id);
+
+    saveState();
+    renderAll();
+}
+
+function openDocumentModal(){
+
+    modal(`
+        <h2 class="text-3xl font-bold">
+            Uploader document
+        </h2>
+
+        <div class="space-y-4 mt-6">
+
+            <input id="dName"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Nom document"/>
+
+            <select id="dType"
+            class="w-full border rounded-2xl px-4 py-3">
+
+                <option>Contrat</option>
+                <option>Devis</option>
+                <option>Moodboard</option>
+
+            </select>
+
+            <input type="file"
+            id="dFile"
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            class="w-full border rounded-2xl px-4 py-3"/>
+
+        </div>
+
+        <div class="flex gap-3 mt-8">
+
+            <button onclick="addDocument()"
+            class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+                Ajouter
+            </button>
+
+            <button onclick="closeModal()"
+            class="bg-slate-200 px-5 py-3 rounded-2xl">
+                Annuler
+            </button>
+
+        </div>
+    `);
+}
+
+function addDocument(){
+
+    const fileInput =
+        document.getElementById("dFile");
+
+    const file =
+        fileInput.files[0];
+
+    if(!file){
+
+        alert("Veuillez sélectionner un fichier");
+        return;
+    }
+
+    const reader =
+        new FileReader();
+
+    reader.onload = function(e){
+
+        state.documents.push({
+            id:Date.now(),
+            name:document.getElementById("dName").value,
+            type:document.getElementById("dType").value,
+            fileName:file.name,
+            fileType:file.type,
+            content:e.target.result
+        });
+
+        saveState();
+        renderDocuments();
+        closeModal();
+
+        logAction("Document uploadé");
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function openDocument(id){
+
+    const doc =
+        state.documents.find(d=>d.id===id);
+
+    if(!doc) return;
+
+    const win = window.open();
+
+    if(doc.fileType.includes("image")){
+
+        win.document.write(`
+            <img src="${doc.content}"
+            style="width:100%;height:auto"/>
+        `);
+
+    }else{
+
+        win.document.write(`
+            <iframe src="${doc.content}"
+            width="100%"
+            height="100%"
+            style="position:fixed;top:0;left:0;border:none">
+            </iframe>
+        `);
+    }
+}
+
+function downloadDocument(id){
+
+    const doc =
+        state.documents.find(d=>d.id===id);
+
+    const a =
+        document.createElement("a");
+
+    a.href = doc.content;
+    a.download = doc.fileName;
+
+    a.click();
+}
+
+function deleteDocument(id){
+
+    state.documents =
+        state.documents.filter(x=>x.id!==id);
+
+    saveState();
+    renderAll();
+}
+
+function openNewNoteModal(){
+
+    modal(`
+        <h2 class="text-3xl font-bold">
+            Nouvelle note
+        </h2>
+
+        <div class="space-y-4 mt-6">
+
+            <input id="newNoteTitle"
+            class="w-full border rounded-2xl px-4 py-3"
+            placeholder="Titre"/>
+
+        </div>
+
+        <div class="flex gap-3 mt-8">
+
+            <button onclick="createNote()"
+            class="bg-[var(--terracotta)] text-white px-5 py-3 rounded-2xl">
+                Créer
+            </button>
+
+            <button onclick="closeModal()"
+            class="bg-slate-200 px-5 py-3 rounded-2xl">
+                Annuler
+            </button>
+
+        </div>
+    `);
+}
+
+function createNote(){
+
+    const note = {
+        id:Date.now(),
+        title:document.getElementById("newNoteTitle").value,
+        content:""
+    };
+
+    state.notesCollection.push(note);
+
+    state.activeNoteId = note.id;
+
+    saveState();
+    renderNotes();
+    closeModal();
+
+    logAction("Nouvelle note créée");
+}
+
+function openNote(id){
+
+    state.activeNoteId = id;
+
+    saveState();
+
+    renderNotes();
+}
+
+function deleteCurrentNote(){
+
+    if(!state.activeNoteId) return;
+
+    state.notesCollection =
+        state.notesCollection.filter(
+            n=>n.id!==state.activeNoteId
+        );
+
+    state.activeNoteId = null;
+
+    saveState();
+
+    renderNotes();
+}
+
+document.addEventListener("input", function(e){
+
+    if(e.target.id==="noteEditor"){
+
+        const active =
+            state.notesCollection.find(
+                n=>n.id===state.activeNoteId
+            );
+
+        if(active){
+
+            active.content = e.target.value;
+
+            saveState();
+        }
+    }
+});
+
+function saveWeddingInfo(){
+
+    state.wedding = {
+        couple:document.getElementById("coupleName").value,
+        date:document.getElementById("weddingDate").value,
+        place:document.getElementById("weddingPlace").value,
+        planner:document.getElementById("planner").value
+    };
+
+    saveState();
+
+    logAction("Informations mariage sauvegardées");
+
+    alert("Informations sauvegardées");
+}
+
+function saveSettings(){
+
+    state.settings.theme =
+        document.getElementById("themeSelect").value;
+
+    state.settings.budget =
+        Number(document.getElementById("globalBudget").value);
+
+    state.settings.maxGuests =
+        Number(document.getElementById("maxGuests").value);
+
+    state.settings.currency =
+        document.getElementById("currency").value;
+
+    saveState();
+
+    applyTheme();
+
+    renderAll();
+
+    logAction("Paramètres mis à jour");
+
+    alert("Paramètres sauvegardés");
+}
+
+document.getElementById("csvFile")
+.addEventListener("change",function(e){
+
+    const file =
+        e.target.files[0];
+
+    if(!file) return;
+
+    Papa.parse(file,{
+        header:true,
+
+        complete:function(results){
+
+            results.data.forEach(row=>{
+
+                if(row.nom){
+
+                    state.guests.push({
+                        id:Date.now()+Math.random(),
+                        last:row.nom || "",
+                        first:row.prenom || "",
+                        rsvp:row.rsvp || "En attente",
+                        diet:row.regime || "Standard",
+                        plus:Number(row.plus || 0)
+                    });
+                }
+            });
+
+            saveState();
+            renderAll();
+
+            alert("CSV importé");
+        }
+    });
+});
+
+function exportBudgetCSV(){
+
+    const ws =
+        XLSX.utils.json_to_sheet(state.budget);
+
+    const wb =
+        XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+        wb,
+        ws,
+        "Budget"
+    );
+
+    XLSX.writeFile(
+        wb,
+        "budget_pristivia.xlsx"
+    );
+}
+
+function exportGuestsCSV(){
+
+    const ws =
+        XLSX.utils.json_to_sheet(state.guests);
+
+    const wb =
+        XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+        wb,
+        ws,
+        "Guests"
+    );
+
+    XLSX.writeFile(
+        wb,
+        "guests_pristivia.xlsx"
+    );
+}
+
+function exportTasksExcel(){
+
+    const ws =
+        XLSX.utils.json_to_sheet(state.tasks);
+
+    const wb =
+        XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+        wb,
+        ws,
+        "Tasks"
+    );
+
+    XLSX.writeFile(
+        wb,
+        "tasks_pristivia.xlsx"
+    );
+}
+
+function exportDocumentsZip(){
+
+    const ws =
+        XLSX.utils.json_to_sheet(
+            state.documents.map(d=>({
+                Nom:d.name,
+                Type:d.type,
+                Fichier:d.fileName
+            }))
+        );
+
+    const wb =
+        XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+        wb,
+        ws,
+        "Documents"
+    );
+
+    XLSX.writeFile(
+        wb,
+        "documents_pristivia.xlsx"
+    );
+}
+
+function exportTablesPDF(){
+
+    const { jsPDF } =
+        window.jspdf;
+
+    const doc =
+        new jsPDF();
+
+    doc.setFontSize(20);
+
+    doc.text(
+        "Plan de table - Pristivia",
+        20,
+        20
+    );
+
+    let y = 40;
+
+    state.tables.forEach(t=>{
+
+        doc.setFontSize(14);
+
+        doc.text(
+            `${t.name} (${t.guests.length}/${t.capacity})`,
+            20,
+            y
+        );
+
+        y += 10;
+
+        t.guests.forEach(gid=>{
+
+            const g =
+                state.guests.find(
+                    x=>x.id===gid
+                );
+
+            if(g){
+
+                doc.text(
+                    `- ${g.first} ${g.last}`,
+                    30,
+                    y
+                );
+
+                y += 8;
+            }
+        });
+
+        y += 10;
+    });
+
+    doc.save("plan_de_table.pdf");
+}
+
+loadState();
+renderAll();
+
+</script>
+
+</body>
+</html>
